@@ -6,38 +6,43 @@
 ### 如何使用
 
 #### 在根目录的build.gradle文件内添加
-
-	allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
+```gradle
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
 	}
+}
+```
 
 #### 在module目录内的build.gradle文件内添加
-
-	dependencies {
-		compile 'com.github.tonyzzp:AndroidCrashMonitor:0.1'
-	}
+```gradle
+dependencies {
+	compile 'com.github.tonyzzp:AndroidCrashMonitor:0.1'
+}
+```
 
 #### 初始化
-
-	CrashMonitor.Config cfg = new CrashMonitor.Config();
-	cfg.email = "myemail@qq.com";
-	CrashMonitor.init(this, cfg);
+```java
+CrashMonitor.Config cfg = new CrashMonitor.Config();
+cfg.email = "myemail@qq.com";
+CrashMonitor.init(this, cfg);
+```
 
 #### 上报日志
-
-    if (CrashMonitor.hasCrashLogs() && CrashMonitor.shouldSendLog()) {
-        CrashMonitor.showReportDialog(this, null);
-    }
+```java
+if (CrashMonitor.hasCrashLogs() && CrashMonitor.shouldSendLog()) {
+    CrashMonitor.showReportDialog(this, null);
+}
+```
 
 #### 增加自定义的上传内容
-
-    CrashMonitor.setLogProvider(new CrashMonitor.LogProvider() {
-        @Override
-        public String provide() {
-            return "mylog:中文:" + this.getClass().toString();
-        }
-    });
+```java
+CrashMonitor.setLogProvider(new CrashMonitor.LogProvider() {
+    @Override
+    public String provide() {
+        return "mylog:中文:" + this.getClass().toString();
+    }
+});
+```
 
