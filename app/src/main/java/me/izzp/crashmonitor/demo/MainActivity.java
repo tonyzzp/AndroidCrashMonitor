@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         CrashMonitor.Config cfg = new CrashMonitor.Config();
-        cfg.email = "tonyzzp@qq.com";
+        cfg.email = "myemail@qq.com";
         CrashMonitor.init(this, cfg);
         CrashMonitor.setLogProvider(new CrashMonitor.LogProvider() {
             @Override
@@ -25,12 +25,28 @@ public class MainActivity extends AppCompatActivity {
         if (CrashMonitor.hasCrashLogs() && CrashMonitor.shouldSendLog()) {
             CrashMonitor.showReportDialog(this, null);
         }
+        CrashMonitor.showReportDialog(this, new CrashMonitor.Feedback() {
+            @Override
+            public void onSend() {
+
+            }
+
+            @Override
+            public void onDonot() {
+
+            }
+
+            @Override
+            public void onNever() {
+
+            }
+        });
         System.out.println(CrashMonitor.getLogsDir().getAbsolutePath());
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 1, 0, "crash");
+        menu.add(0, 1, 0, "crash").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
 
