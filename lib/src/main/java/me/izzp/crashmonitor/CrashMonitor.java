@@ -34,6 +34,18 @@ import java.util.zip.ZipOutputStream;
 
 public class CrashMonitor {
 
+    /**
+     * 用于生成额外的上报日志
+     */
+    public interface LogProvider {
+        /**
+         * 返回一段额外的内容，附加在crashlog中一起上报。此方法在非ui线程被调用
+         *
+         * @return
+         */
+        String provide();
+    }
+
     public static class Config {
         @NonNull
         public String email;
@@ -64,6 +76,7 @@ public class CrashMonitor {
     private static Context ctx;
     private static Config cfg;
     private static SharedPreferences sp;
+    private static LogProvider logProvider;
 
     public static void init(@NonNull Context context, @NonNull Config config) {
         if (hasInit) {
@@ -91,6 +104,7 @@ public class CrashMonitor {
                     StringWriter writer = new StringWriter();
                     e.printStackTrace(new PrintWriter(writer));
                     String s = writer.toString();
+                    s = s.replace("\n", "\r\n");
                     FileWriter fw = new FileWriter(file);
                     fw.write(sysInfo());
                     fw.write(s);
@@ -103,6 +117,15 @@ public class CrashMonitor {
                 }
             }
         });
+    }
+
+    /**
+     * provider的引用将永远不被释放，请留意不要产生内存泄露
+     *
+     * @param provider
+     */
+    public static void setLogProvider(@Nullable LogProvider provider) {
+        logProvider = provider;
     }
 
     private static void checkConfig() {
@@ -233,6 +256,18 @@ public class CrashMonitor {
                             out.closeEntry();
                         }
                     }
+                    String message = null;
+                    if (logProvider != null) {
+                        message = logProvider.provide();
+                    }
+                    if (message != null) {
+                        byte[] buff = message.getBytes("utf-8");
+                        ZipEntry entry = new ZipEntry("message.txt");
+                        entry.setSize(buff.length);
+                        out.putNextEntry(entry);
+                        out.write(buff, 0, buff.length);
+                        out.closeEntry();
+                    }
                     out.flush();
                     out.close();
                     for (File f : fs) {
@@ -254,8 +289,8 @@ public class CrashMonitor {
                 if (zipfile != null) {
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.putExtra(Intent.EXTRA_EMAIL, new String[]{cfg.email});
-                    intent.putExtra(Intent.EXTRA_TITLE, getName() + " 日志反馈");
-                    intent.putExtra(Intent.EXTRA_SUBJECT, getName() + "  日志反馈");
+                    intent.putExtra(Intent.EXTRA_TITLE, getAppName() + " 日志反馈");
+                    intent.putExtra(Intent.EXTRA_SUBJECT, getAppName() + "  日志反馈");
                     intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(zipfile));
                     intent.setType("message/*");
                     intent = Intent.createChooser(intent, null);

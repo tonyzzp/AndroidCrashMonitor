@@ -15,6 +15,12 @@ public class MainActivity extends AppCompatActivity {
         CrashMonitor.Config cfg = new CrashMonitor.Config();
         cfg.email = "tonyzzp@qq.com";
         CrashMonitor.init(this, cfg);
+        CrashMonitor.setLogProvider(new CrashMonitor.LogProvider() {
+            @Override
+            public String provide() {
+                return "mylog:中文:" + this.getClass().toString();
+            }
+        });
 
         if (CrashMonitor.hasCrashLogs() && CrashMonitor.shouldSendLog()) {
             CrashMonitor.showReportDialog(this, null);
