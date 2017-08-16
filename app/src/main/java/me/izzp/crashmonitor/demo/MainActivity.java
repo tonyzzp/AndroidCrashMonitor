@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        System.out.println(CrashMonitor.getLogsDir().getAbsolutePath());
     }
 
     @Override
